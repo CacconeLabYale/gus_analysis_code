@@ -35,8 +35,8 @@ setup(
     zip_safe=False,
     classifiers=[
         # complete classifier list: http://pypi.python.org/pypi?%3Aaction=list_classifiers
-        "Development Status :: 5 - Production/Stable",
-        "Intended Audience :: Developers",
+        "Development Status :: 2 - Pre-Alpha",
+        "Intended Audience :: Science/Research",
         "License :: OSI Approved :: BSD License",
         "Operating System :: Unix",
         "Operating System :: POSIX",
@@ -56,6 +56,22 @@ setup(
     ],
     install_requires=[
         # eg: "aspectlib==1.1.1", "six>=1.7",
+        "click",
+        "numpy",
+        "pandas",
+        "scipy",
+        "seaborn",
+        "ggplot",
+        "matplotlib",
+        "PyVCF",
+        "sklearn",
+        "pybioclim",
+        "geopandas",
+        "munch",
+        "pybedtools",
+        "tabulate",
+        "statsmodels",
+
     ],
     extras_require={
         # eg: "rst": ["docutils>=0.11"],
