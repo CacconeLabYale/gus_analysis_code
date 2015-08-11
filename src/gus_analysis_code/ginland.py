@@ -22,6 +22,8 @@ import vcf
 
 import pybioclim as pbc
 
+from click import echo
+
 
 def generate_ginland_inputs(vcf_path, bioclim_dir, bioclims, sample_locations, ginland_dir, site_members=None):
     """Generate the 4 input files needed for running the `gINLAnd` R package.
@@ -48,23 +50,22 @@ def generate_ginland_inputs(vcf_path, bioclim_dir, bioclims, sample_locations, g
     site_coords_path = ginland_dir + "/site_coords"
     environmental_data_path = ginland_dir + "/environmental_data"
 
-    # Generate allele_count and sample_sizes dataframes
+    echo("Generating allele_count and sample_sizes dataframes.")
     allele_count, sample_sizes = vcf_to_allele_count_and_sample_sizes(vcf_path=vcf_path, site_members=site_members)
 
-    # Learn which sample geolocations are in the VCF
+    echo("Learning which sample geolocations are in the VCF")
     geo_sites = allele_count.index.values
-    geo_sites
 
-    # Generate coords_and_bioclim dataframe
+    echo("Generating `coords_and_bioclim` dataframe.")
     pbc.DATA_DIR = bioclim_dir  # explicitly set the pbc.DATA_DIR (don't just use the data packaged in pbc)
-    coords_and_bioclim = pd.DataFrame.from_csv(sample_locations)
+    coords_and_bioclim = pd.read_csv(sample_locations)
     coords_and_bioclim = add_bioclims_to_df(df=coords_and_bioclim, clim_list=bioclims)
 
-    # Generate site_coords and environmental_data dataframes
+    echo("Generating `site_coords` and `environmental_data` dataframes.")
     site_coords, environmental_data = generate_site_coords_and_env_data(coords_and_bioclim=coords_and_bioclim,
                                                                         geo_sites=geo_sites)
 
-    # write out generated input data to files in the `ginland_dir` directory as CSV.
+    echo("Writing out generated input data to files in the `ginland_dir` directory as CSV files.")
     allele_count.to_csv(allele_count_path + ".csv")
     sample_sizes.to_csv(sample_sizes_path + ".csv")
     site_coords.to_csv(site_coords_path + ".csv")
@@ -84,6 +85,7 @@ def vcf_to_allele_count_and_sample_sizes(vcf_path, site_members=None):
         sample_sizes (pandas.DataFrame)
 
     """
+
     allele_count_dict = nested_defaultdict()
     sample_sizes_dict = nested_defaultdict()
     if site_members is None:
@@ -182,13 +184,14 @@ def generate_site_coords_and_env_data(coords_and_bioclim, geo_sites):
     """
 
     # filter for sites we actually have
-    geo_site_mask = coords_and_bioclim.code.apply(lambda row: row in geo_sites)
+    geo_site_mask = coords_and_bioclim.sample_loc_id.map(lambda row: row in geo_sites)
     coords_and_bioclim_filtered = coords_and_bioclim[geo_site_mask]
 
-    site_coords = coords_and_bioclim_filtered[["lat", "long"]].set_index(coords_and_bioclim_filtered.code.values)
+    site_coords = coords_and_bioclim_filtered[["lat", "long"]].set_index(
+        coords_and_bioclim_filtered.sample_loc_id.values)
     environmental_data = coords_and_bioclim_filtered[
         [x for x in coords_and_bioclim_filtered.columns if x.startswith('bio')]].set_index(
-        coords_and_bioclim_filtered.code.values)
+        coords_and_bioclim_filtered.sample_loc_id.values)
 
     return site_coords.sort(axis=0), environmental_data.sort(axis=0).sort(axis=1)
 
