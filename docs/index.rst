@@ -10,6 +10,7 @@ Contents:
    installation
    usage
    reference/index
+   source/modules
    contributing
    authors
    changelog
