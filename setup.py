@@ -78,7 +78,7 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "gus_analysis_code = gus_analysis_code.__main__:main"
+            "gus_analysis_code = gus_analysis_code.main:cli"
         ]
     },
 )
